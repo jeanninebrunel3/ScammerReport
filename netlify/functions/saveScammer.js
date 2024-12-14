@@ -2,7 +2,7 @@
 
 exports.handler = async function(event, context) {
   try {
-    // Check if the incoming request is a POST request
+    // Ensure the incoming request is a POST request
     if (event.httpMethod !== 'POST') {
       return {
         statusCode: 405, // Method Not Allowed
@@ -10,7 +10,7 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Parse the incoming data (expecting JSON)
+    // Parse the incoming data (assuming it's JSON)
     const { name, phone, fb, rib } = JSON.parse(event.body);
 
     // Validate required fields
@@ -21,18 +21,18 @@ exports.handler = async function(event, context) {
       };
     }
 
-    // Simulate saving the data (you can integrate a real database here)
+    // Simulate saving the scammer data (you can replace this with actual database logic)
     console.log('Saving scammer data:', { name, phone, fb, rib });
 
     // Respond with a success message
     return {
-      statusCode: 200,
+      statusCode: 200, // OK
       body: JSON.stringify({ message: 'Scammer saved successfully!' })
     };
   } catch (error) {
     console.error('Error in saveScammer function:', error);
     return {
-      statusCode: 500,
+      statusCode: 500, // Internal Server Error
       body: JSON.stringify({ message: 'Failed to save scammer.' })
     };
   }
