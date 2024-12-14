@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Scam</title>
+    <style>
+        /* Same styles as before */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: #333;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .form-container {
+            text-align: center;
+            padding: 20px;
+            background-color: #444;
+            margin: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 20px auto;
+            box-sizing: border-box;
+        }
+
+        .form-container h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .form-container input, .form-container textarea {
+            padding: 12px;
+            margin: 8px 0;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+        }
+
+        .form-container button {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #e74c3c;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .form-container button.green {
+            background-color: #2ecc71;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+            position: relative;
+        }
+
+        footer p {
+            margin-top: 10px;
+        }
+
+        #loadingMessage {
+            display: none;
+            font-size: 18px;
+            color: #f39c12;
+        }
+
+        #confirmationMessage {
+            display: none;
+            font-size: 18px;
+            color: #2ecc71;
+        }
+
+        #searchResults {
+            margin-top: 20px;
+            color: white;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Report Scam</h1>
+    </header>
+
+    <div class="container" style="text-align: center; padding: 30px;">
+        <h2>Welcome to Report Scam!</h2>
+        <p>Here you can report scammers, report trusted persons, and search for scammers or trusted persons.</p>
+
+        <!-- Add Scammer Form -->
+        <div class="form-container">
+            <h3>Add Scammer</h3>
+            <form id="addScammerForm">
+                <input type="text" id="scammerName" placeholder="Enter Name" required>
+                <input type="text" id="scammerPhone" placeholder="Enter Phone (Optional)">
+                <input type="url" id="scammerFb" placeholder="Enter Facebook Profile (Optional)">
+                <input type="text" id="scammerRib" placeholder="Enter Bank Account (RIB) (Optional)">
+                <button type="submit">Add Scammer</button>
+            </form>
+        </div>
+
+        <!-- Add Trusted Person Form -->
+        <div class="form-container">
+            <h3>Add Trusted Person</h3>
+            <form id="addTrustedForm">
+                <input type="text" id="trustedName" placeholder="Enter Name" required>
+                <input type="text" id="trustedPhone" placeholder="Enter Phone (Optional)">
+                <input type="url" id="trustedFb" placeholder="Enter Facebook Profile (Optional)">
+                <input type="text" id="trustedRib" placeholder="Enter Bank Account (RIB) (Optional)">
+                <button type="submit" class="green">Add Trusted Person</button>
+            </form>
+        </div>
+
+        <!-- Search Form -->
+        <div class="form-container">
+            <h3>Search for Scammer or Trusted Person</h3>
+            <form id="searchForm">
+                <input type="text" id="searchName" placeholder="Enter Name to Search" required>
+                <input type="text" id="searchPhone" placeholder="Enter Phone (Optional)">
+                <input type="url" id="searchFb" placeholder="Enter Facebook Profile (Optional)">
+                <input type="text" id="searchRib" placeholder="Enter Bank Account (Optional)">
+                <button type="submit">Search</button>
+            </form>
+            <div id="loadingMessage">Loading...</div>
+            <div id="confirmationMessage">Results:</div>
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 ReportScam. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Add Scammer function (for Netlify function)
+        async function addScammer(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('scammerName').value.trim();
+            const phone = document.getElementById('scammerPhone').value.trim();
+            const fb = document.getElementById('scammerFb').value.trim();
+            const rib = document.getElementById('scammerRib').value.trim();
+
+            const data = { name, phone, fb, rib };
+
+            const response = await fetch('/.netlify/functions/saveScammer', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('Scammer added successfully!');
+                document.getElementById('addScammerForm').reset();
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        }
+
+        // Add Trusted Person function (for Netlify function)
+        async function addTrusted(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('trustedName').value.trim();
+            const phone = document.getElementById('trustedPhone').value.trim();
+            const fb = document.getElementById('trustedFb').value.trim();
+            const rib = document.getElementById('trustedRib').value.trim();
+
+            const data = { name, phone, fb, rib };
+
+            const response = await fetch('/.netlify/functions/saveTrusted', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('Trusted person added successfully!');
+                document.getElementById('addTrustedForm').reset();
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        }
+
+        // Attach form submit events
+        document.getElementById('addScammerForm').addEventListener('submit', addScammer);
+        document.getElementById('addTrustedForm').addEventListener('submit', addTrusted);
+    </script>
+</body>
+</html>
