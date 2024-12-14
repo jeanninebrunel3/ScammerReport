@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,8 +37,7 @@
             margin-bottom: 20px;
         }
 
-        .form-container input,
-        .form-container textarea {
+        .form-container input, .form-container textarea {
             padding: 12px;
             margin: 8px 0;
             width: 100%;
@@ -95,9 +93,9 @@
             color: white;
             font-size: 16px;
         }
+
     </style>
 </head>
-
 <body>
     <header>
         <h1>Report Scam</h1>
@@ -152,7 +150,7 @@
     </footer>
 
     <script>
-        // Add Scammer function (for Netlify function)
+        // Add Scammer function
         async function addScammer(event) {
             event.preventDefault();
 
@@ -183,7 +181,7 @@
             }
         }
 
-        // Add Trusted Person function (for Netlify function)
+        // Add Trusted Person function
         async function addTrusted(event) {
             event.preventDefault();
 
@@ -214,7 +212,7 @@
             }
         }
 
-        // Search Scammer or Trusted Person function
+        // Search function
         async function search(event) {
             event.preventDefault();
 
@@ -225,9 +223,8 @@
 
             const data = { name, phone, fb, rib };
 
-            // Show loading message
             document.getElementById('loadingMessage').style.display = 'block';
-            document.getElementById('searchResults').innerHTML = ''; // Clear previous results
+            document.getElementById('searchResults').innerHTML = '';
 
             try {
                 const response = await fetch('/.netlify/functions/search', {
@@ -237,32 +234,29 @@
                 });
 
                 const result = await response.json();
-                document.getElementById('loadingMessage').style.display = 'none'; // Hide loading message
+                document.getElementById('loadingMessage').style.display = 'none';
 
-                if (response.ok) {
-                    // Display search results
-                    const resultsDiv = document.getElementById('searchResults');
-                    if (result.length > 0) {
-                        result.forEach(item => {
-                            resultsDiv.innerHTML += `
-                                <div>
-                                    <h4>${item.name}</h4>
-                                    <p>Phone: ${item.phone}</p>
-                                    <p>Facebook: <a href="${item.fb}" target="_blank">${item.fb}</a></p>
-                                    <p>Bank Account: ${item.rib}</p>
-                                    <hr>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        resultsDiv.innerHTML = '<p>No results found.</p>';
-                    }
+                if (result.length > 0) {
+                    let resultsHTML = '<ul>';
+                    result.forEach(item => {
+                        resultsHTML += `
+                            <li>
+                                Name: ${item.name}<br>
+                                Phone: ${item.phone}<br>
+                                Facebook: <a href="${item.fb}" target="_blank">${item.fb}</a><br>
+                                Bank Account: ${item.rib}
+                            </li>
+                        `;
+                    });
+                    resultsHTML += '</ul>';
+                    document.getElementById('searchResults').innerHTML = resultsHTML;
                 } else {
-                    alert(`Error: ${result.message}`);
+                    document.getElementById('searchResults').innerHTML = 'No results found.';
                 }
             } catch (error) {
-                alert('There was an error processing your request. Please try again later.');
-                console.error('Error searching for scammers/trusted:', error);
+                document.getElementById('loadingMessage').style.display = 'none';
+                alert('There was an error processing your search. Please try again later.');
+                console.error('Error searching:', error);
             }
         }
 
@@ -272,5 +266,4 @@
         document.getElementById('searchForm').addEventListener('submit', search);
     </script>
 </body>
-
 </html>

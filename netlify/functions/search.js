@@ -1,74 +1,48 @@
-// netlify/functions/search.js
 const fs = require('fs');
 const path = require('path');
 
-exports.handler = async function(event, context) {
-    // Only allow POST requests
+// Netlify function to search for scammers/trusted persons
+exports.handler = async function (event, context) {
     if (event.httpMethod !== 'POST') {
-        return {
-            statusCode: 405,
-            body: JSON.stringify({ message: 'Method Not Allowed' }),
-        };
+        return { statusCode: 405, body: JSON.stringify({ message: 'Method Not Allowed' }) };
     }
 
     try {
         const { name, phone, fb, rib } = JSON.parse(event.body);
+        const scammersDataPath = path.join(__dirname, '../../data/scammers.json');
+        const trustedDataPath = path.join(__dirname, '../../data/trusted.json');
 
-        // Path to the scammers and trusted persons data files
-        const scammersFilePath = path.join(__dirname, '../data/scammers.json');
-        const trustedFilePath = path.join(__dirname, '../data/trusted.json');
-
-        // Read the scammers data
+        // Read the data files
         let scammersData = [];
-        try {
-            const fileData = fs.readFileSync(scammersFilePath, 'utf-8');
-            scammersData = JSON.parse(fileData);
-        } catch (error) {
-            scammersData = [];
-        }
-
-        // Read the trusted data
         let trustedData = [];
-        try {
-            const fileData = fs.readFileSync(trustedFilePath, 'utf-8');
-            trustedData = JSON.parse(fileData);
-        } catch (error) {
-            trustedData = [];
+
+        if (fs.existsSync(scammersDataPath)) {
+            const fileContent = fs.readFileSync(scammersDataPath);
+            scammersData = JSON.parse(fileContent);
         }
 
-        // Filter scammers data based on the search criteria
-        const filteredScammers = scammersData.filter(item => {
+        if (fs.existsSync(trustedDataPath)) {
+            const fileContent = fs.readFileSync(trustedDataPath);
+            trustedData = JSON.parse(fileContent);
+        }
+
+        // Filter the data based on search criteria
+        const allData = [...scammersData, ...trustedData];
+        const filteredResults = allData.filter(item => {
             return (
-                (name && item.name.toLowerCase().includes(name.toLowerCase())) ||
-                (phone && item.phone.includes(phone)) ||
-                (fb && item.fb.toLowerCase().includes(fb.toLowerCase())) ||
-                (rib && item.rib.includes(rib))
+                (name && item.name.includes(name)) ||
+                (phone && item.phone && item.phone.includes(phone)) ||
+                (fb && item.fb && item.fb.includes(fb)) ||
+                (rib && item.rib && item.rib.includes(rib))
             );
         });
 
-        // Filter trusted data based on the search criteria
-        const filteredTrusted = trustedData.filter(item => {
-            return (
-                (name && item.name.toLowerCase().includes(name.toLowerCase())) ||
-                (phone && item.phone.includes(phone)) ||
-                (fb && item.fb.toLowerCase().includes(fb.toLowerCase())) ||
-                (rib && item.rib.includes(rib))
-            );
-        });
-
-        // Combine both filtered scammers and trusted data
-        const results = [...filteredScammers, ...filteredTrusted];
-
-        // Return results
         return {
             statusCode: 200,
-            body: JSON.stringify(results),
+            body: JSON.stringify(filteredResults),
         };
     } catch (error) {
         console.error('Error processing search:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Error processing search request' }),
-        };
+        return { statusCode: 500, body: JSON.stringify({ message: 'Error processing search request' }) };
     }
 };
