@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Scam</title>
     <style>
-        /* Same styles as before */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -161,18 +160,23 @@
 
             const data = { name, phone, fb, rib };
 
-            const response = await fetch('/.netlify/functions/saveScammer', {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: { 'Content-Type': 'application/json' }
-            });
+            try {
+                const response = await fetch('/.netlify/functions/saveScammer', {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
-            const result = await response.json();
-            if (response.ok) {
-                alert('Scammer added successfully!');
-                document.getElementById('addScammerForm').reset();
-            } else {
-                alert(`Error: ${result.message}`);
+                const result = await response.json();
+                if (response.ok) {
+                    alert('Scammer added successfully!');
+                    document.getElementById('addScammerForm').reset();
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert('There was an error processing your request. Please try again later.');
+                console.error('Error adding scammer:', error);
             }
         }
 
@@ -187,18 +191,23 @@
 
             const data = { name, phone, fb, rib };
 
-            const response = await fetch('/.netlify/functions/saveTrusted', {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: { 'Content-Type': 'application/json' }
-            });
+            try {
+                const response = await fetch('/.netlify/functions/saveTrusted', {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
-            const result = await response.json();
-            if (response.ok) {
-                alert('Trusted person added successfully!');
-                document.getElementById('addTrustedForm').reset();
-            } else {
-                alert(`Error: ${result.message}`);
+                const result = await response.json();
+                if (response.ok) {
+                    alert('Trusted person added successfully!');
+                    document.getElementById('addTrustedForm').reset();
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                alert('There was an error processing your request. Please try again later.');
+                console.error('Error adding trusted person:', error);
             }
         }
 
