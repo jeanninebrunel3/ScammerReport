@@ -1,39 +1,46 @@
 // netlify/functions/saveScammer.js
+const fs = require('fs');
+const path = require('path');
 
 exports.handler = async function(event, context) {
-  try {
-    // Ensure the incoming request is a POST request
     if (event.httpMethod !== 'POST') {
-      return {
-        statusCode: 405, // Method Not Allowed
-        body: JSON.stringify({ message: 'Only POST requests are allowed' })
-      };
+        return {
+            statusCode: 405,
+            body: JSON.stringify({ message: 'Method Not Allowed' }),
+        };
     }
 
-    // Parse the incoming data (assuming it's JSON)
-    const { name, phone, fb, rib } = JSON.parse(event.body);
+    try {
+        const { name, phone, fb, rib } = JSON.parse(event.body);
 
-    // Validate required fields
-    if (!name) {
-      return {
-        statusCode: 400, // Bad Request
-        body: JSON.stringify({ message: 'Name is required' })
-      };
+        // Path to your local data file (in this case, a JSON file)
+        const filePath = path.join(__dirname, '../data/scammers.json');
+        
+        // Read the existing data from the file
+        let scammersData = [];
+        try {
+            const fileData = fs.readFileSync(filePath, 'utf-8');
+            scammersData = JSON.parse(fileData);
+        } catch (error) {
+            // If the file doesn't exist, start with an empty array
+            scammersData = [];
+        }
+
+        // Push the new scammer data
+        scammersData.push({ name, phone, fb, rib });
+
+        // Save the updated data back to the file
+        fs.writeFileSync(filePath, JSON.stringify(scammersData, null, 2));
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: 'Scammer saved successfully!' }),
+        };
+    } catch (error) {
+        console.error('Error saving scammer:', error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: 'Error saving scammer' }),
+        };
     }
-
-    // Simulate saving the scammer data (you can replace this with actual database logic)
-    console.log('Saving scammer data:', { name, phone, fb, rib });
-
-    // Respond with a success message
-    return {
-      statusCode: 200, // OK
-      body: JSON.stringify({ message: 'Scammer saved successfully!' })
-    };
-  } catch (error) {
-    console.error('Error in saveScammer function:', error);
-    return {
-      statusCode: 500, // Internal Server Error
-      body: JSON.stringify({ message: 'Failed to save scammer.' })
-    };
-  }
 };

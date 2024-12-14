@@ -1,4 +1,7 @@
 // netlify/functions/search.js
+const fs = require('fs');
+const path = require('path');
+
 exports.handler = async function(event, context) {
     // Only allow POST requests
     if (event.httpMethod !== 'POST') {
@@ -9,34 +12,32 @@ exports.handler = async function(event, context) {
     }
 
     try {
-        // Parse incoming JSON data
         const { name, phone, fb, rib } = JSON.parse(event.body);
 
-        // Simulate a database or mock data (replace with real database queries)
-        const results = [
-            {
-                name: 'John Doe',
-                phone: '123-456-7890',
-                fb: 'https://facebook.com/johndoe',
-                rib: '123456789',
-            },
-            {
-                name: 'Jane Smith',
-                phone: '987-654-3210',
-                fb: 'https://facebook.com/janesmith',
-                rib: '987654321',
-            },
-            {
-                name: 'Samuel Green',
-                phone: '555-123-4567',
-                fb: 'https://facebook.com/samuelgreen',
-                rib: '555555555',
-            },
-            // Add more mock data here as needed
-        ];
+        // Path to the scammers and trusted persons data files
+        const scammersFilePath = path.join(__dirname, '../data/scammers.json');
+        const trustedFilePath = path.join(__dirname, '../data/trusted.json');
 
-        // Filter results based on the search criteria
-        const filteredResults = results.filter(item => {
+        // Read the scammers data
+        let scammersData = [];
+        try {
+            const fileData = fs.readFileSync(scammersFilePath, 'utf-8');
+            scammersData = JSON.parse(fileData);
+        } catch (error) {
+            scammersData = [];
+        }
+
+        // Read the trusted data
+        let trustedData = [];
+        try {
+            const fileData = fs.readFileSync(trustedFilePath, 'utf-8');
+            trustedData = JSON.parse(fileData);
+        } catch (error) {
+            trustedData = [];
+        }
+
+        // Filter scammers data based on the search criteria
+        const filteredScammers = scammersData.filter(item => {
             return (
                 (name && item.name.toLowerCase().includes(name.toLowerCase())) ||
                 (phone && item.phone.includes(phone)) ||
@@ -45,10 +46,23 @@ exports.handler = async function(event, context) {
             );
         });
 
-        // Return filtered results as JSON response
+        // Filter trusted data based on the search criteria
+        const filteredTrusted = trustedData.filter(item => {
+            return (
+                (name && item.name.toLowerCase().includes(name.toLowerCase())) ||
+                (phone && item.phone.includes(phone)) ||
+                (fb && item.fb.toLowerCase().includes(fb.toLowerCase())) ||
+                (rib && item.rib.includes(rib))
+            );
+        });
+
+        // Combine both filtered scammers and trusted data
+        const results = [...filteredScammers, ...filteredTrusted];
+
+        // Return results
         return {
             statusCode: 200,
-            body: JSON.stringify(filteredResults),
+            body: JSON.stringify(results),
         };
     } catch (error) {
         console.error('Error processing search:', error);

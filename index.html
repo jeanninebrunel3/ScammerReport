@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,7 +38,8 @@
             margin-bottom: 20px;
         }
 
-        .form-container input, .form-container textarea {
+        .form-container input,
+        .form-container textarea {
             padding: 12px;
             margin: 8px 0;
             width: 100%;
@@ -95,6 +97,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <h1>Report Scam</h1>
@@ -211,9 +214,9 @@
             }
         }
 
-        // Search function for Scam and Trusted people
-        async function searchScammer(event) {
-            event.preventDefault(); // Prevent form submission
+        // Search Scammer or Trusted Person function
+        async function search(event) {
+            event.preventDefault();
 
             const name = document.getElementById('searchName').value.trim();
             const phone = document.getElementById('searchPhone').value.trim();
@@ -224,6 +227,7 @@
 
             // Show loading message
             document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('searchResults').innerHTML = ''; // Clear previous results
 
             try {
                 const response = await fetch('/.netlify/functions/search', {
@@ -238,8 +242,6 @@
                 if (response.ok) {
                     // Display search results
                     const resultsDiv = document.getElementById('searchResults');
-                    resultsDiv.innerHTML = ''; // Clear previous results
-
                     if (result.length > 0) {
                         result.forEach(item => {
                             resultsDiv.innerHTML += `
@@ -267,7 +269,8 @@
         // Attach form submit events
         document.getElementById('addScammerForm').addEventListener('submit', addScammer);
         document.getElementById('addTrustedForm').addEventListener('submit', addTrusted);
-        document.getElementById('searchForm').addEventListener('submit', searchScammer);
+        document.getElementById('searchForm').addEventListener('submit', search);
     </script>
 </body>
+
 </html>
