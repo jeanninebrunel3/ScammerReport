@@ -93,7 +93,6 @@
             color: white;
             font-size: 16px;
         }
-
     </style>
 </head>
 <body>
@@ -224,7 +223,7 @@
             const data = { name, phone, fb, rib };
 
             document.getElementById('loadingMessage').style.display = 'block';
-            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('searchResults').innerHTML = ''; // Clear previous results
 
             try {
                 const response = await fetch('/.netlify/functions/search', {
@@ -234,28 +233,29 @@
                 });
 
                 const result = await response.json();
-                document.getElementById('loadingMessage').style.display = 'none';
 
-                if (result.length > 0) {
-                    let resultsHTML = '<ul>';
-                    result.forEach(item => {
-                        resultsHTML += `
-                            <li>
-                                Name: ${item.name}<br>
-                                Phone: ${item.phone}<br>
-                                Facebook: <a href="${item.fb}" target="_blank">${item.fb}</a><br>
-                                Bank Account: ${item.rib}
-                            </li>
-                        `;
-                    });
-                    resultsHTML += '</ul>';
-                    document.getElementById('searchResults').innerHTML = resultsHTML;
+                if (response.ok) {
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    if (result.length > 0) {
+                        const resultsHtml = result.map(item => `
+                            <div>
+                                <h4>${item.name}</h4>
+                                <p>Phone: ${item.phone}</p>
+                                <p>Facebook: <a href="${item.fb}" target="_blank">${item.fb}</a></p>
+                                <p>Bank Account: ${item.rib}</p>
+                            </div>
+                        `).join('');
+                        document.getElementById('searchResults').innerHTML = resultsHtml;
+                    } else {
+                        document.getElementById('searchResults').innerHTML = 'No results found.';
+                    }
                 } else {
-                    document.getElementById('searchResults').innerHTML = 'No results found.';
+                    document.getElementById('loadingMessage').style.display = 'none';
+                    alert(`Error: ${result.message}`);
                 }
             } catch (error) {
                 document.getElementById('loadingMessage').style.display = 'none';
-                alert('There was an error processing your search. Please try again later.');
+                alert('There was an error processing your search request.');
                 console.error('Error searching:', error);
             }
         }
